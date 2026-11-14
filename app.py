@@ -36,28 +36,58 @@ st.caption("A class practice app that calculates a quote.")
 st.info("Starter file loaded. Complete the TODO sections before submitting.")
 
 # TODO 3 - Step 5: Put the required controls in a sidebar.
-# Collect customer_name, product, quantity, fulfillment and show_chart.
-# Keep quantity an integer from 1 through 30.
-
+st.sidebar.header("Order Options")
+customer_name = st.sidebar.text_input("Customer name", value="")
+product = st.sidebar.selectbox("Product", list(menu.keys()))
+quantity = st.sidebar.number_input("Quantity", min_value=1, max_value=30, value=1, step=1)
+fulfillment = st.sidebar.selectbox("Fulfillment", ["Pickup", "Delivery"])
+show_chart = st.sidebar.checkbox("Show sample sales chart", value=True)
 
 # TODO 4 - Step 6: Calculate unit_price, subtotal and discounted_subtotal.
-# Call your functions. Calculate discount_amount, delivery_fee and total.
-# Pickup costs 0; Delivery uses shipping_fee(subtotal).
-
+unit_price = menu[product]
+subtotal = unit_price * quantity
+discounted_subtotal = apply_discount(subtotal)
+discount_amount = round(subtotal - discounted_subtotal, 2)
+# Pickup costs $0.00; Delivery uses shipping_fee(subtotal) based on the original subtotal
+delivery_fee = 0.00 if fulfillment == "Pickup" else shipping_fee(subtotal)
+total = round(discounted_subtotal + delivery_fee, 2)
 
 # TODO 5 - Step 7: Show the quote in two columns with dollars to 2 decimals.
-# Include product, quantity, unit price, fulfillment, subtotal, discount,
-# delivery fee and final total. Keep this outside the button block.
+st.subheader("Current Quote")
+col1, col2 = st.columns(2)
 
+with col1:
+    st.write(f"**Selected product:** {product}")
+    st.write(f"**Quantity:** {quantity}")
+    st.write(f"**Unit price:** ${unit_price:.2f}")
+    st.write(f"**Fulfillment:** {fulfillment}")
+
+with col2:
+    st.write(f"**Original item subtotal:** ${subtotal:.2f}")
+    st.write(f"**Discount amount:** -${discount_amount:.2f}")
+    st.write(f"**Delivery fee:** ${delivery_fee:.2f}")
+    st.metric("Final total", f"${total:.2f}")
 
 # TODO 6 - Step 8: Build and display the menu table from the menu dictionary.
-# Add a clearly labeled fictional sample-sales chart controlled by show_chart.
+st.subheader("Bakery Menu")
+menu_data = {
+    "Product": list(menu.keys()),
+    "Price ($)": [f"${price:.2f}" for price in menu.values()]
+}
+st.dataframe(menu_data, hide_index=True)
 
+st.subheader("Sample Sales")
+st.caption("Fictional sample sales data for display practice.")
+# Add a clearly labeled fictional sample-sales chart controlled by show_chart.
+if show_chart:
+    st.bar_chart(data=sample_sales, x="Product", y="Units sold", sort=False)
 
 # TODO 7 - Step 9: Add a Check quote button.
-# Warn if customer_name is blank or spaces only. Otherwise show a check message.
-# Do not claim that an order was saved, submitted or paid for.
-
+if st.button("Check quote"):
+    cleaned_name = customer_name.strip()
+    if not cleaned_name:
+        st.warning("Please enter a customer name or nickname.")
+    else:
+        st.success(f"Quote checked successfully for {cleaned_name}! Note: This practice app does not save an order or take a payment.")
 
 # TODO 8: Test, add your own comments and remove the starter info message.
-# Do not upload your submission report or screenshots to this public repository.
